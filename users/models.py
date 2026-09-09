@@ -7,4 +7,4 @@ class User(AbstractUser):
     can_be_contacted = models.BooleanField(default=False)
     can_data_be_shared = models.BooleanField(default=False)
 
-# Create your models here.
+    REQUIRED_FIELDS = ["age"]
