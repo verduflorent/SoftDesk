@@ -75,6 +75,7 @@ class IssueViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated, IsAuthorOrReadOnly]
+    lookup_field = "uuid"
 
     def get_queryset(self):
         return Comment.objects.filter(
