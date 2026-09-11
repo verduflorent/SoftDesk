@@ -31,6 +31,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         Contributor.objects.create(
             user=self.request.user,
             project=project,
+            author=self.request.user,
         )
 
 
@@ -43,7 +44,7 @@ class ContributorViewSet(viewsets.ModelViewSet):
             Contributor.objects.filter(
                 project__contributors__user=self.request.user,
             )
-            .select_related("project__author")
+            .select_related("author", "project__author")
             .distinct()
             .order_by("created_time", "pk")
         )
@@ -54,6 +55,19 @@ class ContributorViewSet(viewsets.ModelViewSet):
         if project.author != self.request.user:
             raise PermissionDenied(
                 "Seul l'auteur du projet peut ajouter un contributeur."
+            )
+
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        project = serializer.validated_data.get(
+            "project",
+            serializer.instance.project,
+        )
+
+        if project.author != self.request.user:
+            raise PermissionDenied(
+                "Seul l'auteur du projet peut modifier un contributeur."
             )
 
         serializer.save()
@@ -86,6 +100,22 @@ class IssueViewSet(viewsets.ModelViewSet):
 
         serializer.save(author=self.request.user)
 
+    def perform_update(self, serializer):
+        project = serializer.validated_data.get(
+            "project",
+            serializer.instance.project,
+        )
+
+        if not Contributor.objects.filter(
+            user=self.request.user,
+            project=project,
+        ).exists():
+            raise PermissionDenied(
+                "Vous devez être contributeur du projet pour déplacer cette issue."
+            )
+
+        serializer.save()
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -114,3 +144,19 @@ class CommentViewSet(viewsets.ModelViewSet):
             )
 
         serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        issue = serializer.validated_data.get(
+            "issue",
+            serializer.instance.issue,
+        )
+
+        if not Contributor.objects.filter(
+            user=self.request.user,
+            project=issue.project,
+        ).exists():
+            raise PermissionDenied(
+                "Vous devez être contributeur du projet pour déplacer ce commentaire."
+            )
+
+        serializer.save()
