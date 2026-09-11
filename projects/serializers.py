@@ -23,15 +23,19 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class ContributorSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source="author.username")
+
     class Meta:
         model = Contributor
         fields = [
             "id",
             "user",
             "project",
+            "author",
             "created_time",
         ]
         read_only_fields = [
+            "author",
             "created_time",
         ]
 
