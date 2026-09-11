@@ -22,6 +22,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
             )
             .select_related("author")
             .distinct()
+            .order_by("created_time", "pk")
         )
 
     def perform_create(self, serializer):
@@ -44,6 +45,7 @@ class ContributorViewSet(viewsets.ModelViewSet):
             )
             .select_related("project__author")
             .distinct()
+            .order_by("created_time", "pk")
         )
 
     def perform_create(self, serializer):
@@ -68,6 +70,7 @@ class IssueViewSet(viewsets.ModelViewSet):
             )
             .select_related("author", "project", "assignee")
             .distinct()
+            .order_by("created_time", "pk")
         )
 
     def perform_create(self, serializer):
@@ -96,6 +99,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             )
             .select_related("author", "issue__project")
             .distinct()
+            .order_by("created_time", "pk")
         )
 
     def perform_create(self, serializer):
