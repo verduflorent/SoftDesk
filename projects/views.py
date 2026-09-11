@@ -1,7 +1,12 @@
 from rest_framework import permissions, viewsets
 
-from .models import Contributor, Issue, Project
-from .serializers import ContributorSerializer, IssueSerializer, ProjectSerializer
+from .models import Comment, Contributor, Issue, Project
+from .serializers import (
+    CommentSerializer,
+    ContributorSerializer,
+    IssueSerializer,
+    ProjectSerializer,
+)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -27,6 +32,15 @@ class ContributorViewSet(viewsets.ModelViewSet):
 class IssueViewSet(viewsets.ModelViewSet):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
