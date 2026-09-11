@@ -39,6 +39,11 @@ class Contributor(models.Model):
         on_delete=models.CASCADE,
         related_name="contributors",
     )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="contributions_created",
+    )
     created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
