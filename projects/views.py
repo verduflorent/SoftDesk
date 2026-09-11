@@ -16,9 +16,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsAuthorOrReadOnly]
 
     def get_queryset(self):
-        return Project.objects.filter(
-            contributors__user=self.request.user,
-        ).distinct()
+        return (
+            Project.objects.filter(
+                contributors__user=self.request.user,
+            )
+            .select_related("author")
+            .distinct()
+        )
 
     def perform_create(self, serializer):
         project = serializer.save(author=self.request.user)
@@ -34,9 +38,13 @@ class ContributorViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsProjectAuthorOrReadOnly]
 
     def get_queryset(self):
-        return Contributor.objects.filter(
-            project__contributors__user=self.request.user,
-        ).distinct()
+        return (
+            Contributor.objects.filter(
+                project__contributors__user=self.request.user,
+            )
+            .select_related("project__author")
+            .distinct()
+        )
 
     def perform_create(self, serializer):
         project = serializer.validated_data["project"]
@@ -54,9 +62,13 @@ class IssueViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsAuthorOrReadOnly]
 
     def get_queryset(self):
-        return Issue.objects.filter(
-            project__contributors__user=self.request.user,
-        ).distinct()
+        return (
+            Issue.objects.filter(
+                project__contributors__user=self.request.user,
+            )
+            .select_related("author", "project", "assignee")
+            .distinct()
+        )
 
     def perform_create(self, serializer):
         project = serializer.validated_data["project"]
@@ -78,9 +90,13 @@ class CommentViewSet(viewsets.ModelViewSet):
     lookup_field = "uuid"
 
     def get_queryset(self):
-        return Comment.objects.filter(
-            issue__project__contributors__user=self.request.user,
-        ).distinct()
+        return (
+            Comment.objects.filter(
+                issue__project__contributors__user=self.request.user,
+            )
+            .select_related("author", "issue__project")
+            .distinct()
+        )
 
     def perform_create(self, serializer):
         issue = serializer.validated_data["issue"]
