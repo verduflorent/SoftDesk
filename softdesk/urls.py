@@ -19,7 +19,7 @@ from django.urls import include, path
 
 from rest_framework.routers import DefaultRouter
 
-from projects.views import ContributorViewSet, ProjectViewSet
+from projects.views import ContributorViewSet, IssueViewSet, ProjectViewSet
 from users.views import UserViewSet
 
 
@@ -28,6 +28,7 @@ router = DefaultRouter()
 router.register("users", UserViewSet, basename="user")
 router.register("projects", ProjectViewSet, basename="project")
 router.register("contributors", ContributorViewSet, basename="contributor")
+router.register("issues", IssueViewSet, basename="issue")
 
 
 urlpatterns = [
