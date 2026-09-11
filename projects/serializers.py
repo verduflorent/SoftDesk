@@ -62,6 +62,11 @@ class IssueSerializer(serializers.ModelSerializer):
         project = data.get("project")
         assignee = data.get("assignee")
 
+        if self.instance:
+            project = project or self.instance.project
+            if "assignee" not in data:
+                assignee = self.instance.assignee
+
         if assignee and project:
             is_contributor = Contributor.objects.filter(
                 user=assignee,
