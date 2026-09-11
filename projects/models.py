@@ -25,6 +25,7 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+
 class Contributor(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -48,3 +49,57 @@ class Contributor(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.project.name}"
+
+
+class Issue(models.Model):
+    class Priority(models.TextChoices):
+        LOW = "LOW", "Low"
+        MEDIUM = "MEDIUM", "Medium"
+        HIGH = "HIGH", "High"
+
+    class Tag(models.TextChoices):
+        BUG = "BUG", "Bug"
+        FEATURE = "FEATURE", "Feature"
+        TASK = "TASK", "Task"
+
+    class Status(models.TextChoices):
+        TO_DO = "TO_DO", "To Do"
+        IN_PROGRESS = "IN_PROGRESS", "In Progress"
+        FINISHED = "FINISHED", "Finished"
+
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    priority = models.CharField(
+        max_length=10,
+        choices=Priority.choices,
+    )
+    tag = models.CharField(
+        max_length=10,
+        choices=Tag.choices,
+    )
+    status = models.CharField(
+        max_length=15,
+        choices=Status.choices,
+        default=Status.TO_DO,
+    )
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name="issues",
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="issues_created",
+    )
+    assignee = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="issues_assigned",
+    )
+    created_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
