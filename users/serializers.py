@@ -14,8 +14,12 @@ class UserSerializer(serializers.ModelSerializer):
             "can_be_contacted",
             "can_data_be_shared",
         ]
+        read_only_fields = ["id"]
         extra_kwargs = {
-            "password": {"write_only": True},
+            "password": {
+                "write_only": True,
+                "required": False,
+            },
         }
 
     def validate_age(self, value):
@@ -27,3 +31,15 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop("password", None)
+
+        for attribute, value in validated_data.items():
+            setattr(instance, attribute, value)
+
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+        return instance
